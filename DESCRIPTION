@@ -1,0 +1,16 @@
+Package: xgrove
+Title: Surrogate groves
+Version: 0.1-0
+Date: 2023-04-25
+Author: Gero Szepannek [aut, cre]
+Maintainer: Gero Szepannek <gero.szepannek@web.de>
+Description:  Compute surrogate groves to explain predictive machine learning model and analyze complexity vs. explanatory power.
+License: GPL (>=2)
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    gbm,
+    dplyr
+Suggests: 
+    pdp
+RoxygenNote: 7.2.0
