@@ -16,7 +16,7 @@
 #' @param model   A model with corresponding predict function that returns numeric values.
 #' @param data    Data that must not (!) contain the target variable.
 #' @param ntrees  Sequence of integers: number of boosting trees for rule extraction.
-#' @param pfun    Optional predict function returning a number if not the default \code{predict()} method of the \code{model}.
+#' @param pfun    Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.
 #' @param seed    Seed for the random number generator to ensure reproducible results (e.g. for the default \code{bag.fraction} < 1 in boosting).
 #' @param ...     Further arguments to be passed to \code{gbm} or the \code{predict()} method of the \code{model}.
 #'

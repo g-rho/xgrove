@@ -20,7 +20,7 @@ xgrove(
 
 \item{ntrees}{Sequence of integers: number of boosting trees for rule extraction.}
 
-\item{pfun}{Optional predict function returning a number if not the default \code{predict()} method of the \code{model}.}
+\item{pfun}{Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.}
 
 \item{seed}{Seed for the random number generator to ensure reproducible results (e.g. for the default \code{bag.fraction} < 1 in boosting).}
 
