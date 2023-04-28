@@ -1,3 +1,5 @@
+# TBD: summarize similar numeric splits if no training observation is concerned
+
 #' @importFrom gbm gbm
 #' @importFrom gbm pretty.gbm.tree
 #' @importFrom dplyr group_by
@@ -5,7 +7,7 @@
 #' @importFrom stats cor
 #' @importFrom stats predict
 #'
-#' @title Exlnanation groves
+#' @title Explnanation groves
 #'
 #' @description Compute surrogate groves to explain predictive machine learning model and analyze complexity vs. explanatory power.
 #'
@@ -65,6 +67,7 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, seed 
   # compute surrogate grove for specified maximal number of trees
   data$surrogatetarget <- surrogatetarget
   surrogate_grove <- gbm::gbm(surrogatetarget ~., data = data, n.trees = max(ntrees), ...)
+  if(surrogate_grove$interaction.depth > 1) stop("gbm interaction.depth is supposed to be 1. Please do not specify it differently within the ... argument.")
 
   # extract groves of different size and compute performance
   explanation     <- NULL
