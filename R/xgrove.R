@@ -24,7 +24,7 @@
 #'
 #' @return List of the results:
 #' @return \item{explanation}{Matrix containing tree sizes, rules, explainability \eqn{{\Upsilon}} and the correlation between the predictions of the explanation and the true model.}
-#' @return \item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated.}
+#' @return \item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merge if they lead to identical parititions of the training data}
 #' @return \item{groves}{Rules of the explanation grove.}
 #' @return \item{model}{\code{gbm} model.}
 #'
@@ -116,7 +116,33 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, seed 
     df <- dplyr::group_by(df, vars, splits, left)
     df_small <- as.data.frame(dplyr::summarise(df, pleft = sum(pleft), pright = sum(pright)))
     df <- as.data.frame(df)
-
+    
+    # merge rules for numeric variables 
+    if(nrow(df_small) > 1){
+      i <- 2
+      while (i != 0){
+        drop.rule <- FALSE  
+        if(is.numeric(data[,df_small$vars[i]])){
+          for(j in 1:(i-1)){
+            if(df_small$vars[i] == df_small$vars[j]) {
+              v1  <- data[,df_small$vars[i]] <= df_small$splits[i]
+              v2  <- data[,df_small$vars[j]] <= df_small$splits[j]
+              tab <- table(v1, v2)
+              if(sum(diag(tab)) == sum(tab)) {
+                df_small$pleft[j]  <- df_small$pleft[i] + df_small$pleft[j] 
+                df_small$pright[j] <- df_small$pright[i] + df_small$pright[j] 
+                drop.rule <- TRUE
+              }
+            }
+          }
+        }
+        if(drop.rule) {df_small  <- df_small[-i,]}
+        if(!drop.rule) {i <- i+1}
+        if(i > nrow(df_small)) {i <- 0}
+      }
+    }
+    
+    # compute complexity and explainability statistics
     trees      <- nt
     rules      <- nrow(df_small) #
     ASE <- mean((data$surrogatetarget - predictions)^2)

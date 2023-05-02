@@ -2,7 +2,7 @@
 % Please edit documentation in R/xgrove.R
 \name{xgrove}
 \alias{xgrove}
-\title{Exlnanation groves}
+\title{Explnanation groves}
 \usage{
 xgrove(
   model,
@@ -31,7 +31,7 @@ List of the results:
 
 \item{explanation}{Matrix containing tree sizes, rules, explainability \eqn{{\Upsilon}} and the correlation between the predictions of the explanation and the true model.}
 
-\item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated.}
+\item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merge if they lead to identical parititions of the training data}
 
 \item{groves}{Rules of the explanation grove.}
 
