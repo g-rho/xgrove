@@ -1,13 +1,14 @@
-# TBD: summarize similar numeric splits if no training observation is concerned
-
 #' @importFrom gbm gbm
 #' @importFrom gbm pretty.gbm.tree
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom stats cor
 #' @importFrom stats predict
+#' @importFrom rpart rpart
+#' @importFrom rpart rpart.control
+#' @importFrom rpart.plot rpart.plot
 #'
-#' @title Explnanation groves
+#' @title Explanation groves
 #'
 #' @description Compute surrogate groves to explain predictive machine learning model and analyze complexity vs. explanatory power.
 #'
@@ -239,3 +240,159 @@ upsilon <- function(porig, pexp){
 }
 
 
+
+
+#' @title Surrogate trees
+#'
+#' @description Compute surrogate trees of different depth to explain predictive machine learning model and analyze complexity vs. explanatory power.
+#'
+#' @details A surrogate grove is trained via gradient boosting using \code{\link[rpart]{rpart}} on \code{data} with the predictions of using of the \code{model} as target variable.
+#' Note that \code{data} must not contain the original target variable! 
+#'
+#' @param model   A model with corresponding predict function that returns numeric values.
+#' @param data    Data that must not (!) contain the target variable.
+#' @param maxdeps Sequence of integers: Maximum depth of the trees.
+#' @param cparam  Complexity parameter for growing the trees.
+#' @param pfun    Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.
+#' @param ...     Further arguments to be passed to \code{\link[rpart]{rpart.control}} or the \code{predict()} method of the \code{model}.
+#'
+#' @return List of the results:
+#' @return \item{explanation}{Matrix containing tree sizes, rules, explainability \eqn{{\Upsilon}} and the correlation between the predictions of the explanation and the true model.}
+#' @return \item{rules}{List of rules for each tree.}
+#' @return \item{model}{List of the \code{rpart} models.}
+#'
+#' @export
+#'
+#' @examples
+#' library(randomForest)
+#' library(pdp)
+#' data(boston)
+#' set.seed(42)
+#' rf    <- randomForest(cmedv ~ ., data = boston)
+#' data  <- boston[,-3] # remove target variable
+#' maxds <- 1:7
+#' st    <- sgtree(rf, data, maxds)
+#' st
+#' # rules for tree of depth 3
+#' st$rules[["3"]]
+#' # plot tree of depth 3
+#' rpart.plot::rpart.plot(st$model[["3"]])
+#'
+#' @author \email{gero.szepannek@@web.de}
+#'
+#' @references \itemize{
+#'     \item {Szepannek, G. and Laabs, B.H. (2023): Can’t see the forest for the trees -- analyzing groves to explain random forests,
+#'            Behaviormetrika, submitted}.
+#'     \item {Szepannek, G. and Luebke, K.(2023): How much do we see? On the explainability of partial dependence plots for credit risk scoring,
+#'            Argumenta Oeconomica 50, DOI: 10.15611/aoe.2023.1.07}.
+#'   }
+#'
+#' @rdname sgtree
+sgtree <- function(model, data, maxdeps = 1:8, cparam = 0, pfun = NULL, ...){ #seed = 42
+
+#browser()    
+  #set.seed(seed)
+  if(is.null(pfun)) {
+    surrogatetarget <- predict(model, data)
+    if(!is.numeric(surrogatetarget) | !is.vector(surrogatetarget)) stop("Default predict method does not return a numeric vector. Please specify pfun argument!")
+  }
+  if(!is.null(pfun)){
+    surrogatetarget <- pfun(model = model, data= data)
+    if(!is.numeric(surrogatetarget) | !is.vector(surrogatetarget)) stop("pfun does not return a numeric vector!")
+  }
+  
+  # compute surrogate grove for specified maximal number of trees
+  data$surrogatetarget <- surrogatetarget
+  
+  surrogate_trees <- list()
+  rules  <- list()
+  explanation     <- NULL   # #rules etc...
+  
+  for(md in maxdeps){
+    surrogate_trees[[as.character(md)]] <- rpart::rpart(surrogatetarget ~ ., data = data, 
+                                                        control = rpart::rpart.control(cp = cparam, minsplit = 1, minbucket = 1, maxcompete = 0, maxsurrogate = 0, maxdepth = md)) # ...
+    if(is.null(surrogate_trees[[as.character(md)]]$splits)){
+      rules[[as.character(md)]] <- NULL
+      explanation <- rbind(explanation, c(1, 0, 0, 0))
+    }
+    if(!is.null(surrogate_trees[[as.character(md)]]$splits)){
+      frame    <- surrogate_trees[[as.character(md)]]$frame 
+      splits   <- surrogate_trees[[as.character(md)]]$splits
+      csplit   <- surrogate_trees[[as.character(md)]]$csplit
+      frame    <- frame[,c(1:3)] #[,c(1:3,5)]
+      splits   <- splits[,c(1,2,4)]
+      newrules    <- frame[frame$var != "<leaf>",]
+      if(!is.matrix(splits)) {splits <- as.data.frame(t(splits))} # if only one split
+      newrules    <- cbind(newrules, splits)
+      newrules$left <- ifelse(newrules$ncat < 0, "<" , ">")
+      newrules    <- newrules[,c(1,7,6,5,2,3)]   
+      
+      # For a factor, the index column contains the row number of the csplit matrix
+      for(j in 1:nrow(newrules)){
+        vn <- newrules$var[j]
+        #if(is.factor(data[[vn]])){
+        if(newrules$ncat[j] > 1){
+          ind <- newrules$index[j]
+          sel <- which(csplit[ind,] == 1)
+          newrules$index[j] <- paste(levels(data[[vn]])[sel], collapse = " + ")
+          newrules$left[j]  <- "among"
+          # The columns record 1 if that level of the factor goes to the left, 3 if it goes to the right, 
+          # and 2 if that level is not present at this node of the tree (or not defined for the factor).
+        }
+      }  
+      rules[[as.character(md)]] <- newrules
+      
+      # compute complexity and explainability statistics
+      trees      <- 1
+      nrules      <- nrow(newrules)
+      
+      predictions <- predict(surrogate_trees[[as.character(md)]], data)
+      ASE <- mean((data$surrogatetarget - predictions)^2)
+      ASE0 <- mean((data$surrogatetarget - mean(data$surrogatetarget))^2)
+      upsilon <- 1 - ASE / ASE0
+      rho <- cor(data$surrogatetarget, predictions)
+      
+      explanation <- rbind(explanation, c(trees, nrules, upsilon, rho))
+    }
+    
+  }
+  colnames(explanation) <- c("trees","rules","upsilon","cor")
+  
+  res <- list(explanation = explanation, rules = rules, model = surrogate_trees)
+  class(res) <- "sgtree"
+  return(res)
+}
+
+#' @title Plot surrogate tree statistics
+#'
+#' @description Plot statistics of surrogate trees to analyze complexity vs. explanatory power.
+#'
+#' @param x    An object of class \code{sgtree}.
+#' @param abs  Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
+#' @param ord  Name of the measure to be plotted on the y-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
+#' @param ...  Further arguments passed to \code{plot}.
+#'
+#' @examples
+#' library(randomForest)
+#' library(pdp)
+#' data(boston)
+#' set.seed(42)
+#' rf <- randomForest(cmedv ~ ., data = boston)
+#' data <- boston[,-3] # remove target variable
+#' ntrees <- c(4,8,16,32,64,128)
+#' xg <- xgrove(rf, data, ntrees)
+#' xg
+#' plot(xg)
+#'
+#' @author \email{gero.szepannek@@web.de}
+#'
+#' @rdname plot.sgtree
+#' @export
+plot.sgtree <- function(x, abs = "rules", ord = "upsilon", ...){
+  i <- which(colnames(x$explanation) == abs)
+  j <- which(colnames(x$explanation) == ord)
+  plot(x$explanation[,i], x$explanation[,j], xlab = abs, ylab = ord, type = "b", ...)
+}
+
+#' @export
+print.sgtree <- function(x, ...) print(x$explanation)
