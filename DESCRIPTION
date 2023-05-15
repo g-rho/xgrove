@@ -1,7 +1,7 @@
 Package: xgrove
 Title: Explanation groves
-Version: 0.1-2
-Date: 2023-05-02
+Version: 0.1-3
+Date: 2023-05-15
 Author: Gero Szepannek [aut, cre]
 Maintainer: Gero Szepannek <gero.szepannek@web.de>
 Description:  Compute surrogate explanation groves for predictive machine learning model and analyze complexity vs. explanatory power of an explanation.
@@ -10,7 +10,10 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     gbm,
-    dplyr
+    dplyr,
+    rpart,
+    rpart.plot
 Suggests: 
-    pdp
+    pdp,
+    randomForest
 RoxygenNote: 7.2.0

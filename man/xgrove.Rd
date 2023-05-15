@@ -2,7 +2,7 @@
 % Please edit documentation in R/xgrove.R
 \name{xgrove}
 \alias{xgrove}
-\title{Explnanation groves}
+\title{Explanation groves}
 \usage{
 xgrove(
   model,
