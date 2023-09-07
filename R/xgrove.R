@@ -20,6 +20,10 @@
 #' @param data    Data that must not (!) contain the target variable.
 #' @param ntrees  Sequence of integers: number of boosting trees for rule extraction.
 #' @param pfun    Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.
+#' @param shrink  Sets the \code{shrinkage} argument for the internal call of \code{\link[gbm]{gbm}}. As the \code{model} usually has a deterministic response 
+#' the default is 1 different to the default of \code{\link[gbm]{gbm}} applied train a model based on data.
+#' @param b.frac  Sets the \code{bag.fraction} argument for the internal call of \code{\link[gbm]{gbm}}. As the \code{model} usually has a deterministic response 
+#' the default is 1 different to the default of \code{\link[gbm]{gbm}} applied train a model based on data.
 #' @param seed    Seed for the random number generator to ensure reproducible results (e.g. for the default \code{bag.fraction} < 1 in boosting).
 #' @param ...     Further arguments to be passed to \code{gbm} or the \code{predict()} method of the \code{model}.
 #'
@@ -46,14 +50,14 @@
 #' @author \email{gero.szepannek@@web.de}
 #'
 #' @references \itemize{
-#'     \item {Szepannek, G. and Laabs, B.H. (2023): Can’t see the forest for the trees -- analyzing groves to explain random forests,
-#'            Behaviormetrika, submitted}.
+#'     \item {Szepannek, G. and von Holt, B.H. (2023): Can’t see the forest for the trees -- analyzing groves to explain random forests,
+#'            Behaviormetrika, DOI: 10.1007/s41237-023-00205-2}.
 #'     \item {Szepannek, G. and Luebke, K.(2023): How much do we see? On the explainability of partial dependence plots for credit risk scoring,
 #'            Argumenta Oeconomica 50, DOI: 10.15611/aoe.2023.1.07}.
 #'   }
 #'
 #' @rdname xgrove
-xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, seed = 42, ...){
+xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, shrink = 1, b.frac = 1, seed = 42, ...){
   
   set.seed(seed)
   if(is.null(pfun)) {
@@ -67,7 +71,7 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, seed 
 
   # compute surrogate grove for specified maximal number of trees
   data$surrogatetarget <- surrogatetarget
-  surrogate_grove <- gbm::gbm(surrogatetarget ~., data = data, n.trees = max(ntrees), ...)
+  surrogate_grove <- gbm::gbm(surrogatetarget ~., data = data, n.trees = max(ntrees), shrinkage = shrink, bag.fraction = b.frac, ...)
   if(surrogate_grove$interaction.depth > 1) stop("gbm interaction.depth is supposed to be 1. Please do not specify it differently within the ... argument.")
 
   # extract groves of different size and compute performance
