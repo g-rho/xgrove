@@ -1,3 +1,5 @@
+utils::globalVariables(c("left")) # resolves note on 'no visible binding for global variable 'left'' in group_by() in ln.123.
+
 #' @importFrom gbm gbm
 #' @importFrom gbm pretty.gbm.tree
 #' @importFrom dplyr group_by
