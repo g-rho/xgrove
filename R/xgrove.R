@@ -183,6 +183,8 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, shrin
 #' @param ord  Name of the measure to be plotted on the y-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ...  Further arguments passed to \code{plot}.
 #'
+#' @return No return value.
+#'
 #' @examples
 #' library(randomForest)
 #' library(pdp)
@@ -216,6 +218,13 @@ print.xgrove <- function(x, ...) print(x$explanation)
 #' @param porig    An object of class \code{xgrove}.
 #' @param pexp  Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #'
+#' @return Numeric explainability upsilon.
+#'
+#' @references \itemize{
+#'     \item {Szepannek, G. and Luebke, K.(2023): How much do we see? On the explainability of partial dependence plots for credit risk scoring,
+#'            Argumenta Oeconomica 50, DOI: 10.15611/aoe.2023.1.07}.
+#'   }
+#'   
 #' @examples
 #' library(randomForest)
 #' library(pdp)
@@ -377,6 +386,8 @@ sgtree <- function(model, data, maxdeps = 1:8, cparam = 0, pfun = NULL, ...){ #s
 #' @param abs  Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ord  Name of the measure to be plotted on the y-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ...  Further arguments passed to \code{plot}.
+#'
+#' @return No return value.
 #'
 #' @examples
 #' library(randomForest)

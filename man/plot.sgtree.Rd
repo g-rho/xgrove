@@ -15,6 +15,9 @@
 
 \item{...}{Further arguments passed to \code{plot}.}
 }
+\value{
+No return value.
+}
 \description{
 Plot statistics of surrogate trees to analyze complexity vs. explanatory power.
 }

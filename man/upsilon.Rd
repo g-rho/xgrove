@@ -11,6 +11,9 @@ upsilon(porig, pexp)
 
 \item{pexp}{Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.}
 }
+\value{
+Numeric explainability upsilon.
+}
 \description{
 Compute explainability given predicted data of the model and an explainer.
 }
@@ -30,6 +33,12 @@ xg <- xgrove(rf, data)
 pexp <- predict(xg$model, data, n.trees = 16)
 upsilon(porig, pexp)
 
+}
+\references{
+\itemize{
+    \item {Szepannek, G. and Luebke, K.(2023): How much do we see? On the explainability of partial dependence plots for credit risk scoring,
+           Argumenta Oeconomica 50, DOI: 10.15611/aoe.2023.1.07}.
+  }
 }
 \author{
 \email{gero.szepannek@web.de}
