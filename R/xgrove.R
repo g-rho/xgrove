@@ -48,6 +48,19 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #' xg <- xgrove(rf, data, ntrees)
 #' xg
 #' plot(xg)
+#' 
+#' # Example of a classification problem using the iris data.
+#' # A predict function has to be defined, here for the posterior probabilities of the class Virginica.  
+#' data(iris)
+#' set.seed(42)
+#' rf    <- randomForest(Species ~ ., data = iris)
+#' data  <- iris[,-5] # remove target variable
+#' 
+#' pf <- function(model, data){
+#'   predict(model, data, type = "prob")[,3]
+#'   }
+#'   
+#' xgrove(rf, data, pfun = pf)
 #'
 #' @author \email{gero.szepannek@@web.de}
 #'
