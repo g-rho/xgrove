@@ -1,5 +1,9 @@
-xgrove_0.1-8 2023-11-04  - Example added for classification where a predict functiomn has to be defined.  
-xgrove_0.1-7 2023-09-12  - Changes according to CRAN newbei check: reference added to description, vlaue added to .Rd files plot.sgtree, plot.xgrove, upsilon  
+TBD:
+- set gbm argument distributopm to "Gaussian" to avoid warning
+- add 'missing' column to $rules in output 
+
+xgrove_0.1-8 2023-11-04  - Example added for classification where a predict function has to be defined.  
+xgrove_0.1-7 2023-09-12  - Changes according to CRAN check: reference added to description, vlaue added to .Rd files plot.sgtree, plot.xgrove, upsilon  
 xgrove_0.1-6 2023-09-11  - Title field changed to title case according to note from r-winbuilder.
 xgrove_0.1-5 2023-09-08  - ln.1 added according to 'vo visible binding' note referring to ln.123 / group_by
 xgrove_0.1-4 2023-09-07  - Arguments shrink = 1, b.frac = 1 added to xgrove() in order to change defaults of gbm() call.
