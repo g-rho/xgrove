@@ -39,7 +39,7 @@ List of the results:
 
 \item{explanation}{Matrix containing tree sizes, rules, explainability \eqn{{\Upsilon}} and the correlation between the predictions of the explanation and the true model.}
 
-\item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merge if they lead to identical parititions of the training data}
+\item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merged if they lead to identical parititions of the training data.}
 
 \item{groves}{Rules of the explanation grove.}
 
@@ -51,7 +51,12 @@ Compute surrogate groves to explain predictive machine learning model and analyz
 \details{
 A surrogate grove is trained via gradient boosting using \code{\link[gbm]{gbm}} on \code{data} with the predictions of using of the \code{model} as target variable.
 Note that \code{data} must not contain the original target variable! The boosting model is trained using stumps of depth 1.
-The resulting interpretation is extracted from \code{\link[gbm]{pretty.gbm.tree}}.
+The resulting interpretation is extracted from \code{\link[gbm]{pretty.gbm.tree}}. 
+The column \code{upper_bound_left} of the \code{rules} and the \code{groves} value of the output object contains 
+the split point for numeric variables denoting the uppoer bound of the left branch. Correspondingly, the 
+\code{levels_left} column contains the levels of factor variables assigned to the left branch. 
+The rule weights of the branches are given in the rightmost columns. The prediction of the grove is 
+obtained as the sum of the assigned weights over all rows.
 }
 \examples{
 library(randomForest)

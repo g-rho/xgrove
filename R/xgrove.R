@@ -16,7 +16,12 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #'
 #' @details A surrogate grove is trained via gradient boosting using \code{\link[gbm]{gbm}} on \code{data} with the predictions of using of the \code{model} as target variable.
 #' Note that \code{data} must not contain the original target variable! The boosting model is trained using stumps of depth 1.
-#' The resulting interpretation is extracted from \code{\link[gbm]{pretty.gbm.tree}}.
+#' The resulting interpretation is extracted from \code{\link[gbm]{pretty.gbm.tree}}. 
+#' The column \code{upper_bound_left} of the \code{rules} and the \code{groves} value of the output object contains 
+#' the split point for numeric variables denoting the uppoer bound of the left branch. Correspondingly, the 
+#' \code{levels_left} column contains the levels of factor variables assigned to the left branch. 
+#' The rule weights of the branches are given in the rightmost columns. The prediction of the grove is 
+#' obtained as the sum of the assigned weights over all rows.       
 #'
 #' @param model   A model with corresponding predict function that returns numeric values.
 #' @param data    Data that must not (!) contain the target variable.
@@ -31,7 +36,7 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #'
 #' @return List of the results:
 #' @return \item{explanation}{Matrix containing tree sizes, rules, explainability \eqn{{\Upsilon}} and the correlation between the predictions of the explanation and the true model.}
-#' @return \item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merge if they lead to identical parititions of the training data}
+#' @return \item{rules}{Summary of the explanation grove: Rules with identical splits are aggegated. For numeric variables any splits are merged if they lead to identical parititions of the training data.}
 #' @return \item{groves}{Rules of the explanation grove.}
 #' @return \item{model}{\code{gbm} model.}
 #'
@@ -86,7 +91,7 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, shrin
 
   # compute surrogate grove for specified maximal number of trees
   data$surrogatetarget <- surrogatetarget
-  surrogate_grove <- gbm::gbm(surrogatetarget ~., data = data, n.trees = max(ntrees), shrinkage = shrink, bag.fraction = b.frac, ...)
+  surrogate_grove <- gbm::gbm(surrogatetarget ~., data = data, distribution = "gaussian", n.trees = max(ntrees), shrinkage = shrink, bag.fraction = b.frac, ...)
   if(surrogate_grove$interaction.depth > 1) stop("gbm interaction.depth is supposed to be 1. Please do not specify it differently within the ... argument.")
 
   # extract groves of different size and compute performance
@@ -174,6 +179,9 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, shrin
     df       <- rbind(df0, df)
     df_small <- rbind(df0, df_small)
 
+    # for better 
+    colnames(df) <- colnames(df_small) <- c("variable", "upper_bound_left", "levels_left", "pleft", "pright")
+    
     groves[[length(groves)+1]] <- df
     interpretation[[length(interpretation)+1]]   <- df_small
     explanation <- rbind(explanation, c(trees, rules, upsilon, rho))
