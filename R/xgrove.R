@@ -1,11 +1,11 @@
 utils::globalVariables(c("left")) # resolves note on 'no visible binding for global variable 'left'' in group_by() in ln.123.
-
 #' @importFrom gbm gbm
 #' @importFrom gbm pretty.gbm.tree
 #' @importFrom dplyr group_by
 #' @importFrom dplyr summarise
 #' @importFrom stats cor
 #' @importFrom stats predict
+#' @importFrom stats terms
 #' @importFrom rpart rpart
 #' @importFrom rpart rpart.control
 #' @importFrom rpart.plot rpart.plot
@@ -22,11 +22,14 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #' \code{levels_left} column contains the levels of factor variables assigned to the left branch. 
 #' The rule weights of the branches are given in the rightmost columns. The prediction of the grove is 
 #' obtained as the sum of the assigned weights over all rows.       
+#' Note that the training data must not contain the target variable. It can be either removed manually or will be removed automatically from \code{data} 
+#' if the argument \code{remove.target == TRUE}.    
 #'
 #' @param model   A model with corresponding predict function that returns numeric values.
-#' @param data    Data that must not (!) contain the target variable.
+#' @param data    Training data.
 #' @param ntrees  Sequence of integers: number of boosting trees for rule extraction.
 #' @param pfun    Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.
+#' @param remove.target Logical. If \code{TRUE} the name of the target variable is identified from \code{terms(model)} and automatically removed if this variable is still in \code{data}.   
 #' @param shrink  Sets the \code{shrinkage} argument for the internal call of \code{\link[gbm]{gbm}}. As the \code{model} usually has a deterministic response 
 #' the default is 1 different to the default of \code{\link[gbm]{gbm}} applied train a model based on data.
 #' @param b.frac  Sets the \code{bag.fraction} argument for the internal call of \code{\link[gbm]{gbm}}. As the \code{model} usually has a deterministic response 
@@ -77,7 +80,24 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #'   }
 #'
 #' @rdname xgrove
-xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, shrink = 1, b.frac = 1, seed = 42, ...){
+xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remove.target = T, shrink = 1, b.frac = 1, seed = 42, ...){
+  
+  if(remove.target){
+    # adapted from: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
+    getResponse <- function(trms) {
+      vars <- as.character(attr(trms, "variables"))[-1] ## [1] is the list call
+      response <- attr(trms, "response") # index of response var
+      vars[response] 
+    }
+    
+    respname  <- getResponse(terms(model))
+    whichresp <- colnames(data) == respname
+    if (any(whichresp)){
+      whichresp <- which(whichresp)
+      message(paste("Response variable", colnames(data)[whichresp], "has been removed from data."))
+      data <- data[,-whichresp]
+    }
+  }
   
   set.seed(seed)
   if(is.null(pfun)) {

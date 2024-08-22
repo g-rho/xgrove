@@ -9,6 +9,7 @@ xgrove(
   data,
   ntrees = c(4, 8, 16, 32, 64, 128),
   pfun = NULL,
+  remove.target = T,
   shrink = 1,
   b.frac = 1,
   seed = 42,
@@ -18,11 +19,13 @@ xgrove(
 \arguments{
 \item{model}{A model with corresponding predict function that returns numeric values.}
 
-\item{data}{Data that must not (!) contain the target variable.}
+\item{data}{Training data.}
 
 \item{ntrees}{Sequence of integers: number of boosting trees for rule extraction.}
 
 \item{pfun}{Optional predict function \code{function(model, data)} returning a real number. Default is the \code{predict()} method of the \code{model}.}
+
+\item{remove.target}{Logical. If \code{TRUE} the name of the target variable is identified from \code{terms(model)} and automatically removed if this variable is still in \code{data}.}
 
 \item{shrink}{Sets the \code{shrinkage} argument for the internal call of \code{\link[gbm]{gbm}}. As the \code{model} usually has a deterministic response 
 the default is 1 different to the default of \code{\link[gbm]{gbm}} applied train a model based on data.}
@@ -56,7 +59,9 @@ The column \code{upper_bound_left} of the \code{rules} and the \code{groves} val
 the split point for numeric variables denoting the uppoer bound of the left branch. Correspondingly, the 
 \code{levels_left} column contains the levels of factor variables assigned to the left branch. 
 The rule weights of the branches are given in the rightmost columns. The prediction of the grove is 
-obtained as the sum of the assigned weights over all rows.
+obtained as the sum of the assigned weights over all rows.       
+Note that the training data must not contain the target variable. It can be either removed manually or will be removed automatically from \code{data} 
+if the argument \code{remove.target == TRUE}.
 }
 \examples{
 library(randomForest)
