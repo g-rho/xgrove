@@ -2,7 +2,6 @@ Package: xgrove
 Title: Explanation Groves
 Version: 0.1-11
 Date: 2024-08-23
-Author: Gero Szepannek [aut, cre]
 Maintainer: Gero Szepannek <gero.szepannek@web.de>
 Authors@R: person(given = "Gero",
                   family = "Szepannek",
