@@ -2,6 +2,8 @@ TBD:
 - add 'missing' column to $rules in output 
 - add predict.xgrove method by calling predict(object$surrogate_grove, newdata)
 
+xgrove_0.1-12 2025-09-14  - preliminary test whether model has a terms component or attribute (ln 85ff).  
+xgrove_0.1-11 2025-08-22  - Minor correction due to R winbuilder test.  
 xgrove_0.1-10 2025-08-22  - remove.target argument added (using terms(model)) according to suggesiion from A.Zeileis.  
 xgrove_0.1-9  2025-05-11  - Example added for classification where a predict function has to be defined.  
 xgrove_0.1-8  2023-11-04  - Example added for classification where a predict function has to be defined.  

@@ -83,6 +83,12 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remove.target = T, shrink = 1, b.frac = 1, seed = 42, ...){
   
   if(remove.target){
+    extrms <- try(terms(model), silent = TRUE)
+    if (class(extrms) == "try-error") warning("model has no terms component nor attribute. No target variable to remove. 
+                                              Make sure that this has been done manually before!")
+    }
+  
+  if(remove.target & any(class(a) == "terms")){
     # adapted from: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
     getResponse <- function(trms) {
       vars <- as.character(attr(trms, "variables"))[-1] ## [1] is the list call
