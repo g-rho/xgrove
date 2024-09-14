@@ -88,7 +88,7 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remov
                                               Make sure that this has been done manually before!")
     }
   
-  if(remove.target & any(class(a) == "terms")){
+  if(remove.target & any(class(extrms) == "terms")){
     # adapted from: https://stackoverflow.com/questions/13217322/how-to-reliably-get-dependent-variable-name-from-formula-object
     getResponse <- function(trms) {
       vars <- as.character(attr(trms, "variables"))[-1] ## [1] is the list call
