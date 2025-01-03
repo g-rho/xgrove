@@ -4,10 +4,12 @@
 \alias{plot.xgrove}
 \title{Plot surrogate grove statistics}
 \usage{
-\method{plot}{xgrove}(x, abs = "rules", ord = "upsilon", ...)
+\method{plot}{xgrove}(x, n.trees = NULL, abs = "rules", ord = "upsilon", ...)
 }
 \arguments{
 \item{x}{An object of class \code{xgrove}.}
+
+\item{n.trees}{Number of trees in case the effects of a grove should be visualized and \code{abs} and \code{ord} are ignored. If \code{NULL} a screeplot of complexity vs explanation is shown for \code{abs} vs. \code{ord}.}
 
 \item{abs}{Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.}
 

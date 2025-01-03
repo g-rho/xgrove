@@ -1,7 +1,7 @@
 Package: xgrove
 Title: Explanation Groves
-Version: 0.1-13
-Date: 2024-09-15
+Version: 0.1-14
+Date: 2025-01-03
 Maintainer: Gero Szepannek <gero.szepannek@web.de>
 Authors@R: person(given = "Gero",
                   family = "Szepannek",
@@ -17,7 +17,8 @@ Imports:
     gbm,
     dplyr,
     rpart,
-    rpart.plot
+    rpart.plot,
+    ggplot2
 Suggests: 
     pdp,
     randomForest

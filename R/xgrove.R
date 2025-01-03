@@ -6,9 +6,15 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #' @importFrom stats cor
 #' @importFrom stats predict
 #' @importFrom stats terms
+#' @importFrom stats reshape
 #' @importFrom rpart rpart
 #' @importFrom rpart rpart.control
 #' @importFrom rpart.plot rpart.plot
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 theme_bw
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 coord_flip
 #'
 #' @title Explanation groves
 #'
@@ -224,6 +230,7 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remov
 #' @description Plot statistics of surrogate groves to analyze complexity vs. explanatory power.
 #'
 #' @param x    An object of class \code{xgrove}.
+#' @param n.trees Number of trees in case the effects of a grove should be visualized and \code{abs} and \code{ord} are ignored. If \code{NULL} a screeplot of complexity vs explanation is shown for \code{abs} vs. \code{ord}. 
 #' @param abs  Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ord  Name of the measure to be plotted on the y-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ...  Further arguments passed to \code{plot}.
@@ -246,10 +253,36 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remov
 #'
 #' @rdname plot.xgrove
 #' @export
-plot.xgrove <- function(x, abs = "rules", ord = "upsilon", ...){
-  i <- which(colnames(x$explanation) == abs)
-  j <- which(colnames(x$explanation) == ord)
-  plot(x$explanation[,i], x$explanation[,j], xlab = abs, ylab = ord, type = "b", ...)
+plot.xgrove <- function(x, n.trees = NULL, abs = "rules", ord = "upsilon", ...){
+  if(is.null(n.trees)){
+    i <- which(colnames(x$explanation) == abs)
+    j <- which(colnames(x$explanation) == ord)
+    plot(x$explanation[,i], x$explanation[,j], xlab = abs, ylab = ord, type = "b", ...)
+    
+  }
+  if(!is.null(n.trees)){
+    if(all(names(x$rules) != as.character(n.trees))) stop("Argument n.trees must match the name of an element of x$rules!") 
+    df <- x$rules[[as.character(n.trees)]]
+    
+    df$rule <- paste(df$variable, df$upper_bound_left, sep = " <= ")
+    isna    <- is.na(df$upper_bound_left)
+    df$rule[isna] <- paste(df$variable[isna], df$levels_left[isna], sep = " = ")
+    
+    df2 <- df[,4:6] 
+    b0  <- df2$weight[1]
+    df2 <- df2[-1,]
+    df3 <- reshape(df2, idvar = "rules", varying = list(1:2),
+                   timevar = "TF", v.names = "weight",
+                   times = c("TRUE", "FALSE"),
+                   direction = "long")
+    
+    ggplot(df3, aes(x = rule, y = weight, group = TF, fill = TF)) + 
+      geom_bar(stat = "identity", position = "dodge") +     
+      #geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
+      coord_flip() +
+      xlab("") +
+      theme_bw()
+  }  
 }
 
 #' @export
