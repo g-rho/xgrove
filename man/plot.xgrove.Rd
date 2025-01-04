@@ -35,6 +35,9 @@ xg <- xgrove(rf, data, ntrees)
 xg
 plot(xg)
 
+# alternatively, visualize weights for the grove of size 8:
+plot(xg, n.trees = 8)
+
 }
 \author{
 \email{gero.szepannek@web.de}

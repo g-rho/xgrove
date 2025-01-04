@@ -13,8 +13,9 @@ utils::globalVariables(c("left")) # resolves note on 'no visible binding for glo
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_bar
 #' @importFrom ggplot2 theme_bw
-#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 aes_string
 #' @importFrom ggplot2 coord_flip
+#' @importFrom ggplot2 xlab
 #'
 #' @title Explanation groves
 #'
@@ -230,9 +231,9 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remov
 #' @description Plot statistics of surrogate groves to analyze complexity vs. explanatory power.
 #'
 #' @param x    An object of class \code{xgrove}.
-#' @param n.trees Number of trees in case the effects of a grove should be visualized and \code{abs} and \code{ord} are ignored. If \code{NULL} a screeplot of complexity vs explanation is shown for \code{abs} vs. \code{ord}. 
 #' @param abs  Name of the measure to be plotted on the x-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
 #' @param ord  Name of the measure to be plotted on the y-axis, either \code{"trees"}, \code{"rules"}, \code{"upsilon"} or \code{"cor"}.
+#' @param n.trees Number of trees in case the effects of a grove should be visualized and \code{abs} and \code{ord} are ignored. If \code{NULL} a screeplot of complexity vs explanation is shown for \code{abs} vs. \code{ord}. 
 #' @param ...  Further arguments passed to \code{plot}.
 #'
 #' @return No return value.
@@ -248,6 +249,9 @@ xgrove <- function(model, data, ntrees = c(4,8,16,32,64,128), pfun = NULL, remov
 #' xg <- xgrove(rf, data, ntrees)
 #' xg
 #' plot(xg)
+#' 
+#' # alternatively, visualize weights for the grove of size 8:
+#' plot(xg, n.trees = 8)
 #'
 #' @author \email{gero.szepannek@@web.de}
 #'
@@ -272,11 +276,11 @@ plot.xgrove <- function(x, n.trees = NULL, abs = "rules", ord = "upsilon", ...){
     b0  <- df2$weight[1]
     df2 <- df2[-1,]
     df3 <- reshape(df2, idvar = "rules", varying = list(1:2),
-                   timevar = "TF", v.names = "weight",
+                   timevar = "rule_is", v.names = "effect",
                    times = c("TRUE", "FALSE"),
                    direction = "long")
     
-    ggplot(df3, aes(x = rule, y = weight, group = TF, fill = TF)) + 
+    ggplot(df3, aes_string(x = "rules", y = "effect", group = "rule_is", fill = "rule_is")) + 
       geom_bar(stat = "identity", position = "dodge") +     
       #geom_bar(stat="identity", fill="#f68060", alpha=.6, width=.4) +
       coord_flip() +

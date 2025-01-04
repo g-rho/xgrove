@@ -2,6 +2,7 @@ TBD:
 - add 'missing' column to $rules in output 
 - add predict.xgrove method by calling predict(object$surrogate_grove, newdata)
 
+xgrove_0.1-15 2025-01-03  - Fix R CMD check notes (no vis. bindings): replace aes() by aes_string().  
 xgrove_0.1-14 2025-01-03  - argument n.trees added to plot.xgrove: Visualization of effects.  
 xgrove_0.1-13 2024-09-15  - Bugfix for case remove.target = F  (ln 85ff).  
 xgrove_0.1-12 2024-09-14  - preliminary test whether model has a terms component or attribute (ln 85ff).  
